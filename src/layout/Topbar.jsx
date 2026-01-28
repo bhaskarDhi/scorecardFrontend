@@ -10,11 +10,15 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+
+const SIDEBAR_WIDTH = 280;
+
 export const Topbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
-    const{logout,user}=useAuth();
-  const username = user.userName;
+  const { logout, user } = useAuth();
+
+  const username = user?.userName || "User";
 
   const handleOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -23,19 +27,33 @@ export const Topbar = () => {
   const handleClose = () => setAnchorEl(null);
 
   const handleLogout = () => {
+    handleClose();
     logout();
+    navigate("/"); // optional: redirect after logout
   };
 
   return (
     <AppBar
-      position="static"
+      position="fixed"
       elevation={0}
       sx={{
         bgcolor: "white",
         borderBottom: "1px solid #e2e8f0",
+
+        /* 🔥 CRITICAL FIX */
+        left: `${SIDEBAR_WIDTH}px`,
+        width: `calc(100% - ${SIDEBAR_WIDTH}px)`,
+
+        zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
     >
-      <Toolbar sx={{ justifyContent: "flex-end" }}>
+      <Toolbar
+        sx={{
+          minHeight: 64,
+          justifyContent: "flex-end",
+          px: 3,
+        }}
+      >
         {/* USER DROPDOWN TRIGGER */}
         <Box
           onClick={handleOpen}
@@ -58,9 +76,10 @@ export const Topbar = () => {
               height: 32,
               bgcolor: "#6366f1",
               fontSize: "0.875rem",
+              fontWeight: 600,
             }}
           >
-            {username[0]}
+            {username[0]?.toUpperCase()}
           </Avatar>
 
           <Typography
@@ -71,7 +90,7 @@ export const Topbar = () => {
           </Typography>
         </Box>
 
-        {/* DROPDOWN */}
+        {/* DROPDOWN MENU */}
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
@@ -83,8 +102,7 @@ export const Topbar = () => {
               mt: 1,
               minWidth: 140,
               borderRadius: 2,
-              boxShadow:
-                "0px 8px 24px rgba(0,0,0,0.12)",
+              boxShadow: "0px 8px 24px rgba(0,0,0,0.12)",
             },
           }}
         >
